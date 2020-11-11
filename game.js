@@ -8,7 +8,9 @@ function toRad(degrees)
 }
 
 const FPS = 30 //frames per seconds
+const FRICTION = 0.7 // friction coefficient of space ( 0= no friction , 1= lot of friction)
 const SHIP_SIZE = 30 // ship height in pixels
+const SHIP_THRUST = 5 // acceleration of the ship in pixels per seconds
 const TURN_SPEED = 360 // turn speed in degrees per seconds
 
 let canv = document.getElementById("gameCanvas")
@@ -19,7 +21,12 @@ let ship ={
     y: canv.height /2,
     r: SHIP_SIZE /2,
     a: toRad(90),
-    rot:0
+    rot:0,
+    thrusting: false,
+    thrust: {
+        x:0,
+        y:0
+    }
 }
 
 // setup event handlers
@@ -38,7 +45,7 @@ function keyDown (/** @type {keyboardEvent} */ ev){
         break;
 
         case 38: // up arrow (thrust)
-
+            ship.thrusting = true
         break;
 
         case 39: // right arrow (rotate ship right)
@@ -54,7 +61,7 @@ function keyUp(/** @type {keyboardEvent} */ ev){
         break;
 
         case 38: // up arrow (stop thrust)
-
+        ship.thrusting = false
         break;
 
         case 39: // right arrow (stop rotate ship right)
@@ -69,6 +76,24 @@ function update(){
     context.fillStyle='black';
     
     context.fillRect(0,0,canv.width,canv.height)
+
+    // thrust ship
+    if(ship.thrusting){
+        ship.thrust.x += SHIP_THRUST * Math.cos(ship.a)/FPS;
+        ship.thrust.y -= SHIP_THRUST * Math.sin(ship.a)/FPS;
+    }else{
+        ship.thrust.x -= FRICTION * ship.thrust.x /FPS
+        ship.thrust.y -= FRICTION * ship.thrust.y /FPS
+    }
+    
+    //move ship
+    ship.x += ship.thrust.x;
+    ship.y += ship.thrust.y;
+    
+    
+
+    //rotate ship
+    ship.a += ship.rot
 
 
 
@@ -94,12 +119,4 @@ function update(){
     //center dot
     context.fillStyle='red';
     context.fillRect(ship.x -1, ship.y -1, 2, 2)
-    
-    
-    
-
-    //rotate ship
-    ship.a += ship.rot
-
-    //move ship
 }
