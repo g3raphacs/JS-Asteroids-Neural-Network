@@ -9,7 +9,7 @@ function toRad(degrees)
 
 const FPS = 30 //frames per seconds
 const FRICTION = 0.7 // friction coefficient of space ( 0= no friction , 1= lot of friction)
-const SHIP_SIZE = 20 // ship height in pixels
+const SHIP_SIZE = 30 // ship height in pixels
 const SHIP_THRUST = 5 // acceleration of the ship in pixels per seconds
 const TURN_SPEED = 360 // turn speed in degrees per seconds
 
@@ -81,6 +81,7 @@ function update(){
     if(ship.thrusting){
         ship.thrust.x += SHIP_THRUST * Math.cos(ship.a)/FPS;
         ship.thrust.y -= SHIP_THRUST * Math.sin(ship.a)/FPS;
+
     }else{
         ship.thrust.x -= FRICTION * ship.thrust.x /FPS
         ship.thrust.y -= FRICTION * ship.thrust.y /FPS
@@ -107,7 +108,7 @@ function update(){
     ship.a += ship.rot
 
 
-
+    //-----------------------------DRAW FRAME
     //draw triangular ship
     context.strokeStyle='white';
     context.lineWidth= SHIP_SIZE / 20
@@ -127,7 +128,30 @@ function update(){
     context.closePath();
     context.stroke()
 
+    //draw the thruster
+    if(ship.thrusting){
+        context.fillStyle = 'red';
+        context.strokeStyle='yellow';
+        context.lineWidth= SHIP_SIZE / 20
+        context.beginPath()
+        context.moveTo( //rear left
+            ship.x - ship.r * (3/4 * Math.cos(ship.a) + 0.4 * Math.sin(ship.a)),
+            ship.y + ship.r * (3/4 * Math.sin(ship.a) - 0.4 * Math.cos(ship.a))
+        )
+        context.lineTo( // rear center behind the ship
+            ship.x - ship.r * (6/3 * Math.cos(ship.a)),
+            ship.y + ship.r * (6/3 * Math.sin(ship.a))
+        )
+        context.lineTo( // rear right
+            ship.x - ship.r * (3/4 * Math.cos(ship.a) - 0.4 * Math.sin(ship.a)),
+            ship.y + ship.r * (3/4 * Math.sin(ship.a) + 0.4 * Math.cos(ship.a))
+        )
+        context.closePath();
+        context.fill()
+        context.stroke()
+    }
+
     //center dot
-    context.fillStyle='red';
-    context.fillRect(ship.x -1, ship.y -1, 2, 2)
+    // context.fillStyle='red';
+    // context.fillRect(ship.x -1, ship.y -1, 2, 2)
 }
