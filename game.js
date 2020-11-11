@@ -100,7 +100,7 @@ function newAsteroid(x , y){
         x: x,
         y: y,
         xv: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),
-        xy: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),
+        yv: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),
         r: ROIDS_SIZE / 2,
         a: Math.random() * Math.PI * 2, // in radians
         vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT / 2),
@@ -209,8 +209,22 @@ function update(){
         offs = roids[i].offs;
 
         //move the asteroid
+        roids[i].x += roids[i].xv;
+        roids[i].y += roids[i].yv;
 
         //handle edges of screen
+        if(roids[i].x < 0 - roids[i].r){
+            roids[i].x = canv.width + roids[i].r
+        }
+        else if(roids[i].x > canv.width + roids[i].r){
+            roids[i].x = 0 - roids[i].r
+        }
+        if(roids[i].y < 0 - roids[i].r){
+            roids[i].y = canv.height + roids[i].r
+        }
+        else if(roids[i].y > canv.height + roids[i].r){
+            roids[i].y = 0 - roids[i].r
+        }
 
         //draw a path
         context.beginPath();
