@@ -9,7 +9,7 @@ function toRad(degrees)
 
 const FPS = 30 //frames per seconds
 const FRICTION = 0.7 // friction coefficient of space ( 0= no friction , 1= lot of friction)
-const SHIP_SIZE = 30 // ship height in pixels
+const SHIP_SIZE = 20 // ship height in pixels
 const SHIP_THRUST = 5 // acceleration of the ship in pixels per seconds
 const TURN_SPEED = 360 // turn speed in degrees per seconds
 
@@ -73,7 +73,7 @@ function keyUp(/** @type {keyboardEvent} */ ev){
 
 function update(){
     //draw space
-    context.fillStyle='black';
+    context.fillStyle='rgb(0,40,60)';
     
     context.fillRect(0,0,canv.width,canv.height)
 
@@ -90,6 +90,17 @@ function update(){
     ship.x += ship.thrust.x;
     ship.y += ship.thrust.y;
     
+    //handle edges of screen
+    if(ship.x < 0 - ship.r){
+        ship.x = canv.width + ship.r
+    }else if(ship.x > canv.width + ship.r){
+        ship.x = 0 - ship.r
+    }
+    if(ship.y < 0 - ship.r){
+        ship.y = canv.height + ship.r
+    }else if(ship.y > canv.height + ship.r){
+        ship.y = 0 - ship.r
+    }
     
 
     //rotate ship
