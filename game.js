@@ -16,10 +16,11 @@ const FRICTION = 0.7 // friction coefficient of space ( 0= no friction , 1= lot 
 const SHIP_SIZE = 30 // ship height in pixels
 const SHIP_THRUST = 5 // acceleration of the ship in pixels per seconds
 const TURN_SPEED = 360 // turn speed in degrees per seconds
-const ROIDS_NUM = 300 // starting number of asteroids
+const ROIDS_NUM = 12 // starting number of asteroids
 const ROIDS_SIZE = 100 // starting size of asteroids in pixels
 const ROIDS_SPD = 50 // max starting speed of asteroids in px per seconds
 const ROIDS_VERT = 10 // avergage number of verticies in asteroids
+const ROIDS_JAG = 0.4 // jaggedness of asteroids ( 0= none , 1= lot)
 
 let canv = document.getElementById("gameCanvas");
 let context = canv.getContext("2d");
@@ -102,7 +103,12 @@ function newAsteroid(x , y){
         xy: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),
         r: ROIDS_SIZE / 2,
         a: Math.random() * Math.PI * 2, // in radians
-        vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT / 2)
+        vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT / 2),
+        offs: []
+    }
+    // create the vertex offsets array
+    for (let i = 0; i < roid.vert; i++) {
+        roid.offs.push(Math.random()* ROIDS_JAG * 2 + 1 - ROIDS_JAG);
     }
     return roid;
 }
@@ -192,7 +198,7 @@ function update(){
     //draw asteroids
     context.strokeStyle = "slategrey";
     context.lineWidth = SHIP_SIZE / 20;
-    let x,y,r,a,vert;
+    let x,y,r,a,vert,offs;
     for (let i = 0; i < roids.length; i++){ 
         // get the asteroids properties
         x= roids[i].x;
@@ -200,6 +206,7 @@ function update(){
         r= roids[i].r;
         a= roids[i].a;
         vert= roids[i].vert;
+        offs = roids[i].offs;
 
         //move the asteroid
 
@@ -208,14 +215,14 @@ function update(){
         //draw a path
         context.beginPath();
         context.moveTo(
-            x + r * Math.cos(a),
-            y + r * Math.sin(a)
+            x + r * offs[0] * Math.cos(a),
+            y + r * offs[0] * Math.sin(a) * offs
         );  
         //draw the polygon
-        for (let j = 0; j < vert; j++) {
+        for (let j = 1; j < vert; j++) {
             context.lineTo(
-                x + r * Math.cos(a + j * Math.PI * 2 / vert),
-                y + r * Math.sin(a + j * Math.PI * 2 / vert),
+                x + r * offs[j] * Math.cos(a + j * Math.PI * 2 / vert),
+                y + r * offs[j] * Math.sin(a + j * Math.PI * 2 / vert),
             )
         }
         context.closePath();
