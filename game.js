@@ -239,6 +239,20 @@ function update(){
     for(let i = 0; i < ship.lasers.length; i++){
         ship.lasers[i].x += ship.lasers[i].xv
         ship.lasers[i].y += ship.lasers[i].yv
+
+        //handle edge of screen
+        if (ship.lasers[i].x < 0){
+            ship.lasers[i].x = canv.width
+        }
+        else if (ship.lasers[i].x > canv.width){
+            ship.lasers[i].x = 0;
+        }
+        if (ship.lasers[i].y < 0){
+            ship.lasers[i].y = canv.height
+        }
+        else if (ship.lasers[i].y > canv.height){
+            ship.lasers[i].y = 0;
+        }
     }
 
 
