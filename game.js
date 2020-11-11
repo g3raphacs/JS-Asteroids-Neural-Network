@@ -7,12 +7,16 @@ function toRad(degrees)
   return degrees * (pi/180);
 }
 
+function distBetweenPoints(x1, y1, x2, y2){
+    return Math.sqrt(Math.pow(x2 - x1 , 2) + Math.pow(y2 - y1 , 2));
+}
+
 const FPS = 30 //frames per seconds
 const FRICTION = 0.7 // friction coefficient of space ( 0= no friction , 1= lot of friction)
 const SHIP_SIZE = 30 // ship height in pixels
 const SHIP_THRUST = 5 // acceleration of the ship in pixels per seconds
 const TURN_SPEED = 360 // turn speed in degrees per seconds
-const ROIDS_NUM = 3 // starting number of asteroids
+const ROIDS_NUM = 300 // starting number of asteroids
 const ROIDS_SIZE = 100 // starting size of asteroids in pixels
 const ROIDS_SPD = 50 // max starting speed of asteroids in px per seconds
 const ROIDS_VERT = 10 // avergage number of verticies in asteroids
@@ -83,8 +87,10 @@ function createAsteroidBelt(){
     roids = [];
     let x , y;
     for (let i = 0; i < ROIDS_NUM; i++) {
-        x= Math.floor(Math.random() * canv.width);
-        y= Math.floor(Math.random() * canv.height);
+        do {
+            x= Math.floor(Math.random() * canv.width);
+            y= Math.floor(Math.random() * canv.height);
+        } while (distBetweenPoints(ship.x , ship.y , x , y) < ROIDS_SIZE * 2 + ship.r);
         roids.push(newAsteroid(x , y))
     }
 }
