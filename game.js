@@ -13,6 +13,8 @@ function distBetweenPoints(x1, y1, x2, y2){
 
 const FPS = 60 //frames per seconds
 const FRICTION = 0.7 // friction coefficient of space ( 0= no friction , 1= lot of friction)
+const LASER_MAX = 10 // maximum number on screen at once
+const LASER_SPD = 500 // speed of lasers in px per second
 const SHIP_SIZE = 30 // ship height in pixels
 const SHIP_THRUST = 5 // acceleration of the ship in pixels per seconds
 const SHIP_EXPLODE_DUR = 0.3 // Duration of the ship's explosion
@@ -47,6 +49,10 @@ setInterval(update, 1000 / FPS);
 
 function keyDown (/** @type {keyboardEvent} */ ev){
     switch(ev.keyCode){
+        case 32: // Space Bar (shoot laser)
+            shootLaser();
+        break;
+
         case 37: // left arrow (rotate ship left)
             ship.rot = toRad(TURN_SPEED)/FPS
         break;
@@ -63,6 +69,10 @@ function keyDown (/** @type {keyboardEvent} */ ev){
 
 function keyUp(/** @type {keyboardEvent} */ ev){
     switch(ev.keyCode){
+        case 32: // Space Bar (allow shooting again)
+            ship.canShoot = true;
+        break;
+
         case 37: // left arrow ( stop rotate ship left)
             ship.rot = 0
         break;
@@ -121,9 +131,25 @@ function newShip(){
         },
         explodeTime:0,
         blinkNum: Math.ceil(SHIP_INV_DUR / SHIP_BLINK_DUR),
-        blinkTime: Math.ceil(SHIP_BLINK_DUR * FPS)
-        
+        blinkTime: Math.ceil(SHIP_BLINK_DUR * FPS),
+        canShoot: true,
+        lasers: []
     }
+}
+
+function shootLaser(){
+    //create the laser
+    if(ship.canShoot && ship.lasers.length < LASER_MAX){
+        ship.lasers.push({ //from the nose of the ship
+            x: ship.x + 4/3 * ship.r * Math.cos(ship.a),
+            y: ship.y - 4/3 * ship.r * Math.sin(ship.a),
+            xv: LASER_SPD * Math.cos(ship.a) / FPS,
+            yv: -LASER_SPD * Math.sin(ship.a) / FPS
+        })
+    }
+
+    //prevent shooting
+    ship.canShoot = false;
 }
 
 function explodeShip(){
@@ -138,7 +164,6 @@ function explodeShip(){
 //UPDATE___________________________________________________________
 function update(){
     let blinkOn = ship.blinkNum % 2 == 0;
-    console.log(ship.blinkTime)
     let exploding = ship.explodeTime > 0;
     
     //draw space
@@ -210,6 +235,12 @@ function update(){
         }
     }
 
+    // move lasers
+    for(let i = 0; i < ship.lasers.length; i++){
+        ship.lasers[i].x += ship.lasers[i].xv
+        ship.lasers[i].y += ship.lasers[i].yv
+    }
+
 
 
     //-----------------------------DRAW FRAME
@@ -262,6 +293,14 @@ function update(){
                 context.fillStyle='red';
                 context.fillRect(ship.x -1, ship.y -1, 2, 2)
             }
+
+        }
+        // draw the lasers
+        for (let i = 0; i < ship.lasers.length; i++) {
+            context.fillStyle = "salmon"
+            context.beginPath();
+            context.arc(ship.lasers[i].x, ship.lasers[i].y, SHIP_SIZE / 15 , 0, Math.PI * 2, false)
+            context.fill();
         }
         // handle blinking
         if (ship.blinkNum > 0) {
