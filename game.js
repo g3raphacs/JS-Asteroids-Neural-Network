@@ -15,6 +15,7 @@ const FPS = 60 //frames per seconds
 const FRICTION = 0.7 // friction coefficient of space ( 0= no friction , 1= lot of friction)
 const LASER_MAX = 10 // maximum number on screen at once
 const LASER_SPD = 500 // speed of lasers in px per second
+const LASER_DIST = 0.6 // max distance laser can travel as fraction of screen width
 const SHIP_SIZE = 30 // ship height in pixels
 const SHIP_THRUST = 5 // acceleration of the ship in pixels per seconds
 const SHIP_EXPLODE_DUR = 0.3 // Duration of the ship's explosion
@@ -143,8 +144,9 @@ function shootLaser(){
         ship.lasers.push({ //from the nose of the ship
             x: ship.x + 4/3 * ship.r * Math.cos(ship.a),
             y: ship.y - 4/3 * ship.r * Math.sin(ship.a),
-            xv: LASER_SPD * Math.cos(ship.a) / FPS,
-            yv: -LASER_SPD * Math.sin(ship.a) / FPS
+            xv: LASER_SPD * Math.cos(ship.a) / FPS + ship.thrust.x,
+            yv: -LASER_SPD * Math.sin(ship.a) / FPS + ship.thrust.y,
+            dist: 0
         })
     }
 
@@ -236,25 +238,37 @@ function update(){
     }
 
     // move lasers
-    for(let i = 0; i < ship.lasers.length; i++){
-        ship.lasers[i].x += ship.lasers[i].xv
-        ship.lasers[i].y += ship.lasers[i].yv
+    if(ship.lasers.length > 0){
+        
+        for(let i = ship.lasers.length - 1; i >= 0; i--){
+            //check distance traveled
+            if(ship.lasers[i].dist > LASER_DIST * canv.width){
+                ship.lasers.splice(i,1);
+                continue;
+            }
 
-        //handle edge of screen
-        if (ship.lasers[i].x < 0){
-            ship.lasers[i].x = canv.width
-        }
-        else if (ship.lasers[i].x > canv.width){
-            ship.lasers[i].x = 0;
-        }
-        if (ship.lasers[i].y < 0){
-            ship.lasers[i].y = canv.height
-        }
-        else if (ship.lasers[i].y > canv.height){
-            ship.lasers[i].y = 0;
+            //move
+            ship.lasers[i].x += ship.lasers[i].xv
+            ship.lasers[i].y += ship.lasers[i].yv
+
+            // calculate the distance traveled
+            ship.lasers[i].dist += Math.sqrt(Math.pow(ship.lasers[i].xv, 2) + Math.pow(ship.lasers[i].yv, 2));
+
+            //handle edge of screen
+            if (ship.lasers[i].x < 0){
+                ship.lasers[i].x = canv.width
+            }
+            else if (ship.lasers[i].x > canv.width){
+                ship.lasers[i].x = 0;
+            }
+            if (ship.lasers[i].y < 0){
+                ship.lasers[i].y = canv.height
+            }
+            else if (ship.lasers[i].y > canv.height){
+                ship.lasers[i].y = 0;
+            }
         }
     }
-
 
 
     //-----------------------------DRAW FRAME
