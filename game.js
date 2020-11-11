@@ -12,9 +12,13 @@ const FRICTION = 0.7 // friction coefficient of space ( 0= no friction , 1= lot 
 const SHIP_SIZE = 30 // ship height in pixels
 const SHIP_THRUST = 5 // acceleration of the ship in pixels per seconds
 const TURN_SPEED = 360 // turn speed in degrees per seconds
+const ROIDS_NUM = 3 // starting number of asteroids
+const ROIDS_SIZE = 100 // starting size of asteroids in pixels
+const ROIDS_SPD = 50 // max starting speed of asteroids in px per seconds
+const ROIDS_VERT = 10 // avergage number of verticies in asteroids
 
-let canv = document.getElementById("gameCanvas")
-let context = canv.getContext("2d")
+let canv = document.getElementById("gameCanvas");
+let context = canv.getContext("2d");
 
 let ship ={
     x: canv.width /2,
@@ -29,14 +33,18 @@ let ship ={
     }
 }
 
+//setup asteroids
+let roids = [];
+createAsteroidBelt();
+
 // setup event handlers
-document.addEventListener("keydown", keyDown)
-document.addEventListener("keyup", keyUp)
+document.addEventListener("keydown", keyDown);
+document.addEventListener("keyup", keyUp);
 
 
 
 //setup the game loop
-setInterval(update, 1000 / FPS)
+setInterval(update, 1000 / FPS);
 
 function keyDown (/** @type {keyboardEvent} */ ev){
     switch(ev.keyCode){
@@ -71,11 +79,33 @@ function keyUp(/** @type {keyboardEvent} */ ev){
 
 }
 
+function createAsteroidBelt(){
+    roids = [];
+    let x , y;
+    for (let i = 0; i < ROIDS_NUM; i++) {
+        x= Math.floor(Math.random() * canv.width);
+        y= Math.floor(Math.random() * canv.height);
+        roids.push(newAsteroid(x , y))
+    }
+}
+function newAsteroid(x , y){
+    let roid = {
+        x: x,
+        y: y,
+        xv: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),
+        xy: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),
+        r: ROIDS_SIZE / 2,
+        a: Math.random() * Math.PI * 2, // in radians
+        vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT / 2)
+    }
+    return roid;
+}
+//UPDATE___________________________________________________________
 function update(){
     //draw space
     context.fillStyle='rgb(0,40,60)';
     
-    context.fillRect(0,0,canv.width,canv.height)
+    context.fillRect(0,0,canv.width,canv.height);
 
     // thrust ship
     if(ship.thrusting){
@@ -103,7 +133,6 @@ function update(){
         ship.y = 0 - ship.r
     }
     
-
     //rotate ship
     ship.a += ship.rot
 
@@ -150,8 +179,41 @@ function update(){
         context.fill()
         context.stroke()
     }
-
     //center dot
     // context.fillStyle='red';
     // context.fillRect(ship.x -1, ship.y -1, 2, 2)
+
+    //draw asteroids
+    context.strokeStyle = "slategrey";
+    context.lineWidth = SHIP_SIZE / 20;
+    let x,y,r,a,vert;
+    for (let i = 0; i < roids.length; i++){ 
+        // get the asteroids properties
+        x= roids[i].x;
+        y= roids[i].y;
+        r= roids[i].r;
+        a= roids[i].a;
+        vert= roids[i].vert;
+
+        //move the asteroid
+
+        //handle edges of screen
+
+        //draw a path
+        context.beginPath();
+        context.moveTo(
+            x + r * Math.cos(a),
+            y + r * Math.sin(a)
+        );  
+        //draw the polygon
+        for (let j = 0; j < vert; j++) {
+            context.lineTo(
+                x + r * Math.cos(a + j * Math.PI * 2 / vert),
+                y + r * Math.sin(a + j * Math.PI * 2 / vert),
+            )
+        }
+        context.closePath();
+        context.stroke();
+    }
+
 }
