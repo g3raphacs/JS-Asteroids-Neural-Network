@@ -16,6 +16,7 @@ const FRICTION = 0.7 // friction coefficient of space ( 0= no friction , 1= lot 
 const LASER_MAX = 10 // maximum number on screen at once
 const LASER_SPD = 500 // speed of lasers in px per second
 const LASER_DIST = 0.6 // max distance laser can travel as fraction of screen width
+const LASER_EXPLODE_DUR = 0.1 // Duration of the lasers explosion
 const SHIP_SIZE = 30 // ship height in pixels
 const SHIP_THRUST = 5 // acceleration of the ship in pixels per seconds
 const SHIP_EXPLODE_DUR = 0.3 // Duration of the ship's explosion
@@ -97,16 +98,35 @@ function createAsteroidBelt(){
             x= Math.floor(Math.random() * canv.width);
             y= Math.floor(Math.random() * canv.height);
         } while (distBetweenPoints(ship.x , ship.y , x , y) < ROIDS_SIZE * 2 + ship.r);
-        roids.push(newAsteroid(x , y))
+        roids.push(newAsteroid(x , y, Math.ceil(ROIDS_SIZE / 2)))
     }
 }
-function newAsteroid(x , y){
+function destroyAsteroid(i){
+    console.log(i)
+    let x = roids[i].x
+    let y = roids[i].y
+    let r = roids[i].r
+
+    // split the asteroid in two if necessary
+    if(r == Math.ceil(ROIDS_SIZE / 2)){
+        roids.push(newAsteroid(x,y,Math.ceil(ROIDS_SIZE / 4)))
+        roids.push(newAsteroid(x,y,Math.ceil(ROIDS_SIZE / 4)))
+    }else if(r == Math.ceil(ROIDS_SIZE / 4)){
+        roids.push(newAsteroid(x,y,Math.ceil(ROIDS_SIZE / 8)))
+        roids.push(newAsteroid(x,y,Math.ceil(ROIDS_SIZE / 8)))
+    }
+
+    // destroy the asteroid
+    roids.splice(i,1)
+
+}
+function newAsteroid(x , y , r){
     let roid = {
         x: x,
         y: y,
         xv: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),
         yv: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),
-        r: ROIDS_SIZE / 2,
+        r: r,
         a: Math.random() * Math.PI * 2, // in radians
         vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT / 2),
         offs: []
@@ -146,7 +166,8 @@ function shootLaser(){
             y: ship.y - 4/3 * ship.r * Math.sin(ship.a),
             xv: LASER_SPD * Math.cos(ship.a) / FPS + ship.thrust.x,
             yv: -LASER_SPD * Math.sin(ship.a) / FPS + ship.thrust.y,
-            dist: 0
+            dist: 0,
+            explodeTime: 0
         })
     }
 
@@ -192,6 +213,8 @@ function update(){
             for (let i = 0; i < roids.length; i++) {
                 if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) < ship.r + roids[i].r){
                     explodeShip();
+                    destroyAsteroid(i)
+                    break;
                 }
             }
         }
@@ -269,6 +292,36 @@ function update(){
             }
         }
     }
+
+    //detect laser hits on asteroids
+    if(ship.lasers.length > 0){
+        let ax, ay, ar, lx, ly;
+        for (let i = roids.length-1 ; i>=0; i--){
+            //grap the asteroid properties
+            ax = roids[i].x;
+            ay = roids[i].y;
+            ar = roids[i].r;
+
+            // loop over the lasers
+        
+            for(let j = ship.lasers.length-1 ; j>=0; j--){
+            //grap the laser properties
+            lx = ship.lasers[j].x;
+            ly = ship.lasers[j].y;
+
+                //detect hits
+                if(distBetweenPoints(ax,ay,lx,ly)< ar){
+                    // remove the laser
+                    ship.lasers.splice(j,1); 
+                    // remove asteroid
+                    destroyAsteroid(i);
+                    break;
+                }
+            }
+        }
+    }
+    
+    
 
 
     //-----------------------------DRAW FRAME
