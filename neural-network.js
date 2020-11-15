@@ -109,11 +109,11 @@ class NeuralNetwork{
 
         // error logging
         if(LOG_ON){
-            if(this.logCount = LOG_FREQ){
+            if(this.logCount == LOG_FREQ){
                 console.log("error = " + outputErrors.data[0][0]);
             }
             this.logCount--;
-            if(this.logCount == LOG_FREQ){
+            if(this.logCount == 0){
                 this.logCount = LOG_FREQ;
             }
         }
