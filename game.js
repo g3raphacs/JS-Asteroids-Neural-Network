@@ -68,16 +68,21 @@ if(AUTOMATION_ON){
         [2, 1, -1],
         [4, 3, 0]
     ])
-    let m1 = new Matrix (2,3, [
-        [0, 1, -1],
-        [2, -3, 0]
+    let m1 = new Matrix (3,2, [
+        [0, -1],
+        [2, 4],
+        [2, -3]
     ])
     let m2 = new Matrix (2,2, [
         [1, -1],
         [3, 0]
     ])
+    // let arr = [4,5,6,7];
+    // console.log(arr);
+    console.table(m1.data);
+    console.table(Matrix.transpose(m1).data);
     //m0.randomWeights();
-    console.table(Matrix.subtract(m0,m1).data);
+    // console.table(Matrix.dot(m0,m1).data);
 }
 
 
