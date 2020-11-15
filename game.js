@@ -68,7 +68,16 @@ if(AUTOMATION_ON){
         [2, 1, -1],
         [4, 3, 0]
     ])
-    console.table(m0.data);
+    let m1 = new Matrix (2,3, [
+        [0, 1, -1],
+        [2, -3, 0]
+    ])
+    let m2 = new Matrix (2,2, [
+        [1, -1],
+        [3, 0]
+    ])
+    //m0.randomWeights();
+    console.table(Matrix.subtract(m0,m1).data);
 }
 
 
