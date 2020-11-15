@@ -44,10 +44,10 @@ const SOUND_ON = false;
 const MUSIC_ON = false;
 
 // neural network parameters
-const NUM_INPUTS = 2;
-const NUM_HIDDEN = 5;
+const NUM_INPUTS = 3;
+const NUM_HIDDEN = 10;
 const NUM_OUTPUTS = 1;
-const NUM_SAMPLES = 10000;
+const NUM_SAMPLES = 100000;
 
 let canv = document.getElementById("gameCanvas");
 let context = canv.getContext("2d");
@@ -85,10 +85,10 @@ if(AUTOMATION_ON){
     }
 
     // test output
-    console.log("0 , 0 = " + nn.feedForward([0,0]).data);
-    console.log("0 , 1 = " + nn.feedForward([0,1]).data);
-    console.log("1 , 0 = " + nn.feedForward([1,0]).data);
-    console.log("1 , 1 = " + nn.feedForward([1,1]).data);
+    // console.log("0 , 0 = " + nn.feedForward([0,0]).data);
+    // console.log("0 , 1 = " + nn.feedForward([0,1]).data);
+    // console.log("1 , 0 = " + nn.feedForward([1,0]).data);
+    // console.log("1 , 1 = " + nn.feedForward([1,1]).data);
 }
 
 
