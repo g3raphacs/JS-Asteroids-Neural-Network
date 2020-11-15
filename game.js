@@ -31,14 +31,17 @@ const ROIDS_JAG = 0.2 // jaggedness of asteroids ( 0= none , 1= lot)
 const ROIDS_PTS_LGE = 20
 const ROIDS_PTS_MED = 50
 const ROIDS_PTS_SML = 100
-const SHOW_CENTER_DOT = false;
-const SHOW_BOUNDING = false;
-const SOUND_ON = true;
-const MUSIC_ON = true;
 const TEXT_FADE_TIME = 2.5; //Text fade time in seconds
 const TEXT_SIZE = 40; // text font size in pixels
 const GAME_LIVES = 3;
 const SAVE_KEY_SCORE = "highscore"; // save key for local storage of highscore
+
+// Developper Flags
+const AUTOMATION_ON = true;
+const SHOW_CENTER_DOT = false;
+const SHOW_BOUNDING = false;
+const SOUND_ON = false;
+const MUSIC_ON = false;
 
 let canv = document.getElementById("gameCanvas");
 let context = canv.getContext("2d");
@@ -57,6 +60,17 @@ let roidsLeft, roidsTotal;
 let level, lives, roids, ship, text, textAlpha, score, scoreHigh;
 newGame();
 
+//setup the neural network
+if(AUTOMATION_ON){
+    // TODO neural network
+
+    let m0 = new Matrix (2,3, [
+        [2, 1, -1],
+        [4, 3, 0]
+    ])
+    console.table(m0.data);
+}
+
 
 
 // setup event handlers
@@ -69,7 +83,7 @@ document.addEventListener("keyup", keyUp);
 setInterval(update, 1000 / FPS);
 
 function keyDown (/** @type {keyboardEvent} */ ev){
-    if(ship.dead){
+    if(ship.dead || AUTOMATION_ON){
         return;
     }
     switch(ev.keyCode){
@@ -92,7 +106,7 @@ function keyDown (/** @type {keyboardEvent} */ ev){
 }
 
 function keyUp(/** @type {keyboardEvent} */ ev){
-    if(ship.dead){
+    if(ship.dead || AUTOMATION_ON){
         return;
     }
     switch(ev.keyCode){
@@ -346,6 +360,11 @@ function Music(srcLow,srcHigh){
 function update(){
     let blinkOn = ship.blinkNum % 2 == 0;
     let exploding = ship.explodeTime > 0;
+
+    //Use the neural network to rotate the ship and shoot
+    if(AUTOMATION_ON){
+        // TODO control ship
+    }
     
     //tick the music
     music.tick()
