@@ -30,12 +30,15 @@ const ROIDS_VERT = 16 // avergage number of verticies in asteroids
 const ROIDS_JAG = 0.2 // jaggedness of asteroids ( 0= none , 1= lot)
 const SHOW_CENTER_DOT = false;
 const SHOW_BOUNDING = false;
+const TEXT_FADE_TIME = 2.5; //Text fade time in seconds
+const TEXT_SIZE = 40; // text font size in pixels
+const GAME_LIVES = 3;
 
 let canv = document.getElementById("gameCanvas");
 let context = canv.getContext("2d");
 
 //setup th game parameters
-let level, roids, ship;
+let level, lives, roids, ship, text, textAlpha;
 newGame();
 
 
@@ -50,6 +53,9 @@ document.addEventListener("keyup", keyUp);
 setInterval(update, 1000 / FPS);
 
 function keyDown (/** @type {keyboardEvent} */ ev){
+    if(ship.dead){
+        return;
+    }
     switch(ev.keyCode){
         case 32: // Space Bar (shoot laser)
             shootLaser();
@@ -70,6 +76,9 @@ function keyDown (/** @type {keyboardEvent} */ ev){
 }
 
 function keyUp(/** @type {keyboardEvent} */ ev){
+    if(ship.dead){
+        return;
+    }
     switch(ev.keyCode){
         case 32: // Space Bar (allow shooting again)
             ship.canShoot = true;
@@ -147,13 +156,21 @@ function newAsteroid(x , y , r){
 
 function newGame(){
     level = 0;
+    lives = GAME_LIVES;
     ship = newShip();
     newLevel();
 }
 
 function newLevel(){
-    //setup asteroids
+    text = "Level " + (level+1);
+    textAlpha = 1.0;
     createAsteroidBelt();
+}
+
+function gameOver(){
+    ship.dead = true;
+    text = "Game Over";
+    textAlpha = 1.0;
 }
 
 function newShip(){
@@ -169,6 +186,7 @@ function newShip(){
             y:0
         },
         explodeTime:0,
+        dead: false,
         blinkNum: Math.ceil(SHIP_INV_DUR / SHIP_BLINK_DUR),
         blinkTime: Math.ceil(SHIP_BLINK_DUR * FPS),
         canShoot: true,
@@ -202,6 +220,26 @@ function explodeShip(){
         context.fill();
         context.stroke();
 }
+
+function drawShip(x,y,a,colour = "white"){
+            context.strokeStyle=colour;
+            context.lineWidth= SHIP_SIZE / 20
+            context.beginPath()
+            context.moveTo( //nose of the ship
+                x + 4/3 * ship.r * Math.cos(a),
+                y - 4/3 * ship.r * Math.sin(a)
+            )
+            context.lineTo( // rear left
+                x - ship.r * (3/4 * Math.cos(a) + Math.sin(a)),
+                y + ship.r * (3/4 * Math.sin(a) - Math.cos(a))
+            )
+            context.lineTo( // rear right
+                x - ship.r * (3/4 * Math.cos(a) - Math.sin(a)),
+                y + ship.r * (3/4 * Math.sin(a) + Math.cos(a))
+            )
+            context.closePath();
+            context.stroke()
+}
 //UPDATE___________________________________________________________
 function update(){
     let blinkOn = ship.blinkNum % 2 == 0;
@@ -213,7 +251,7 @@ function update(){
     context.fillRect(0,0,canv.width,canv.height);
 
     // thrust ship
-    if(ship.thrusting){
+    if(ship.thrusting && !ship.dead){
         ship.thrust.x += SHIP_THRUST * Math.cos(ship.a)/FPS;
         ship.thrust.y -= SHIP_THRUST * Math.sin(ship.a)/FPS;
 
@@ -227,7 +265,7 @@ function update(){
         ship.x += ship.thrust.x;
         ship.y += ship.thrust.y;
         //check for asteroid collision
-        if(ship.blinkNum ==0){
+        if(ship.blinkNum ==0 && !ship.dead){
             for (let i = 0; i < roids.length; i++) {
                 if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) < ship.r + roids[i].r){
                     explodeShip();
@@ -238,8 +276,14 @@ function update(){
         }
     }else{
         ship.explodeTime--;
+        //reset the ship after explosion has finished
         if(ship.explodeTime == 0){
-            ship = newShip();
+            lives--;
+            if(lives == 0){
+                gameOver();
+            }else{
+                ship = newShip();
+            }
         }
     }
     
@@ -353,25 +397,9 @@ function update(){
     //-----------------------------DRAW FRAME
     
     if(!exploding){
-        if(blinkOn){
+        if(blinkOn && !ship.dead){
             //draw triangular ship
-            context.strokeStyle='white';
-            context.lineWidth= SHIP_SIZE / 20
-            context.beginPath()
-            context.moveTo( //nose of the ship
-                ship.x + 4/3 * ship.r * Math.cos(ship.a),
-                ship.y - 4/3 * ship.r * Math.sin(ship.a)
-            )
-            context.lineTo( // rear left
-                ship.x - ship.r * (3/4 * Math.cos(ship.a) + Math.sin(ship.a)),
-                ship.y + ship.r * (3/4 * Math.sin(ship.a) - Math.cos(ship.a))
-            )
-            context.lineTo( // rear right
-                ship.x - ship.r * (3/4 * Math.cos(ship.a) - Math.sin(ship.a)),
-                ship.y + ship.r * (3/4 * Math.sin(ship.a) + Math.cos(ship.a))
-            )
-            context.closePath();
-            context.stroke()
+            drawShip(ship.x,ship.y,ship.a);
 
             //draw the thruster
             if(ship.thrusting){
@@ -508,5 +536,26 @@ function update(){
             context.stroke();
         }
     }
+
+    // draw the game text
+    if(textAlpha >= 0 ){
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillStyle = "rgba(255,255,255,"+textAlpha+")";
+        context.font = "small-caps " + TEXT_SIZE + "px arial";
+        context.fillText(text, canv.width / 2 , canv.height * 0.75);
+        textAlpha -= (1.0 / TEXT_FADE_TIME / FPS)
+    }else if (ship.dead){
+        newGame();
+    }
+
+    // draw the lives
+    let lifeColor;
+    for(let i = 0; i< lives; i++){
+        lifeColor = exploding && i == lives -1 ? "red" : "white";
+        drawShip(SHIP_SIZE + i * SHIP_SIZE * 1.2 , SHIP_SIZE, 0.5*Math.PI, lifeColor);
+    }
+    
+
 
 }
