@@ -47,6 +47,7 @@ const MUSIC_ON = false;
 const NUM_INPUTS = 2;
 const NUM_HIDDEN = 5;
 const NUM_OUTPUTS = 1;
+const NUM_SAMPLES = 10000;
 
 let canv = document.getElementById("gameCanvas");
 let context = canv.getContext("2d");
@@ -68,7 +69,26 @@ newGame();
 //setup the neural network
 if(AUTOMATION_ON){
     nn = new NeuralNetwork(NUM_INPUTS , NUM_HIDDEN , NUM_OUTPUTS);
-    nn.feedForward([0,1])
+
+    // train the network
+    for (let i = 0 ; i < NUM_SAMPLES ; i++){
+        // TEST Xor gate logic
+        // 0 0 = 0
+        // 0 1 = 1
+        // 1 0 = 1
+        // 1 1 = 0
+
+        let input0 = Math.round(Math.random()); // 0 or 1
+        let input1 = Math.round(Math.random()); // 0 or 1
+        let output = input0 == input1 ? 0 : 1;
+        nn.train([input0 , input1],[output])
+    }
+
+    // test output
+    console.log("0 , 0 = " + nn.feedForward([0,0]).data);
+    console.log("0 , 1 = " + nn.feedForward([0,1]).data);
+    console.log("1 , 0 = " + nn.feedForward([1,0]).data);
+    console.log("1 , 1 = " + nn.feedForward([1,1]).data);
 }
 
 
