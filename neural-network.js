@@ -1,138 +1,62 @@
-"use strict";
+"use strict"
 
-/************************************
-  MATRIX FUNCTIONS
- ***********************************/
+class NeuralNetwork{
+    constructor(numInputs , numHidden , numOutputs) {
+        this._numInputs = numInputs;
+        this._numHidden = numHidden;
+        this._numOutputs = numOutputs;
+        this._weights0 = new Matrix(this._numInputs , this._numHidden);
+        this._weights1 = new Matrix(this._numHidden , this._numOutputs);
 
-class Matrix {
-    constructor (rows, cols, data = []){
-        this._rows = rows;
-        this._cols = cols;
-        this._data = data;
-
-        //initialize with zeroes if no data provided
-        if(data == null || data.length == 0){
-            this._data = [];
-            for (let i = 0; i< this._rows; i++){
-                this._data[i] = [];
-                for (let j = 0; j < this._cols; j++){
-                    this._data[i][j] = 0;
-                }
-            }
-        }else{
-            // check data integrity
-            if (data.length != rows || data[0].length != cols){
-                throw new Error("Incorrect data dimensions")
-            }
-        }
+        //randomise the initial weights
+        this._weights0.randomWeights();
+        this._weights1.randomWeights();
     }
 
-    get rows() {
-        return this._rows;
+    get weights0(){
+        return this._weights0;
     }
 
-    get cols() {
-        return this._cols;
+    set weights0(weights) {
+        this._weights0 = weights;
     }
 
-    get data() {
-        return this._data;
+    get weights1(){
+        return this._weights1;
     }
 
-    // add two matrices
-    static add(m0, m1){
-        Matrix.checkDimensions(m0,m1);
-        let m = new Matrix(m0.rows, m0.cols);
-        for (let i = 0; i < m.rows; i++){
-            for( let j = 0 ; j < m.cols ; j++){
-                m.data[i][j] =  m0.data[i][j] + m1.data[i][j];
-            }
-        }
-        return m;
-    }
-    // subtract two matrices
-    static subtract(m0, m1){
-        Matrix.checkDimensions(m0,m1);
-        let m = new Matrix(m0.rows, m0.cols);
-        for (let i = 0; i < m.rows; i++){
-            for( let j = 0 ; j < m.cols ; j++){
-                m.data[i][j] =  m0.data[i][j] - m1.data[i][j];
-            }
-        }
-        return m;
+    set weights1(weights) {
+        this._weights1 = weights;
     }
 
-    // dot product of two matrices
-    static dot(m0, m1){
-        if(m0.cols != m1.rows){
-            throw new Error("Matrices are not \"dot\" compatible")
-        }
-        let m = new Matrix(m0.rows, m1.cols);
-        for (let i = 0; i < m.rows; i++){
-            for( let j = 0 ; j < m.cols ; j++){
-                let sum = 0;
-                for(let k = 0; k < m0.cols; k++){
-                    sum += m0.data[i][k] * m1.data[k][j];
-                }
-                m.data[i][j] = sum;
-            }
-        }
-        return m;
-    }
+    feedForward(inputArray){
+        //convert input array to a matrix
+        let inputs = Matrix.convertFromArray(inputArray);
+        console.log("inputs");
+        console.table(inputs.data);
 
-    // multiply two matrices (not the dot product)
-    static multiply(m0, m1){
-        Matrix.checkDimensions(m0,m1);
-        let m = new Matrix(m0.rows, m0.cols);
-        for (let i = 0; i < m.rows; i++){
-            for( let j = 0 ; j < m.cols ; j++){
-                m.data[i][j] =  m0.data[i][j] * m1.data[i][j];
-            }
-        }
-        return m;
-    }
+        //find the hidden values and apply the activation function
+        let hidden = Matrix.dot(inputs, this.weights0);
+        console.log("hidden");
+        console.table(hidden.data);
+        hidden = Matrix.map(hidden, x => sigmoid(x));
+        console.log("hiddenSig");
+        console.table(hidden.data);
 
-    // Apply a fonction to each cell of the given matrix
-    static map(m0, mFunction){
-        let m = new Matrix(m0.rows, m0.cols);
-        for (let i = 0; i < m.rows; i++){
-            for( let j = 0 ; j < m.cols ; j++){
-                m.data[i][j] = mFunction(m0.data[i][j])
-            }
-        }
-        return m;
-    }
+        //find the output values and apply the activation function
+        let outputs = Matrix.dot(hidden, this.weights1);
+        console.log("outputs");
+        console.table(outputs.data);
+        outputs = Matrix.map(outputs, x => sigmoid(x));
+        console.log("outputsSig");
+        console.table(outputs.data);
 
-    // find the transpose of a given matrix
-    static transpose(m0){
-        let m = new Matrix(m0.cols, m0.rows);
-        for (let i = 0; i < m0.rows; i++){
-            for( let j = 0 ; j < m0.cols ; j++){
-                m.data[j][i] = m0.data[i][j];
-            }
-        }
-        return m;
-    }
+        return outputs;
 
-    // check that matrices have the same dimensions
-    static checkDimensions(m0 ,m1){
-        if (m0.rows != m1.rows || m0.cols != m1.cols){
-            throw new Error("Matricies are of different dimensions!")
-        }
+        //apply bias???
     }
+}
 
-    // convert array to a one-rowed matrix
-    static convertFromArray(arr){
-        return new Matrix (1, arr.length, [arr])
-    }
-
-    // apply random weights between -1 and 1
-    randomWeights(){
-        for (let i = 0; i < this._rows; i++){
-            for( let j = 0; j < this._cols; j++){
-                this.data[i][j] = Math.random() * 2 - 1;
-            }
-        }
-    }
-
+function sigmoid(x){
+    return 1 / (1 + Math.exp(-x));
 }

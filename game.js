@@ -43,6 +43,11 @@ const SHOW_BOUNDING = false;
 const SOUND_ON = false;
 const MUSIC_ON = false;
 
+// neural network parameters
+const NUM_INPUTS = 2;
+const NUM_HIDDEN = 5;
+const NUM_OUTPUTS = 1;
+
 let canv = document.getElementById("gameCanvas");
 let context = canv.getContext("2d");
 
@@ -62,27 +67,8 @@ newGame();
 
 //setup the neural network
 if(AUTOMATION_ON){
-    // TODO neural network
-
-    let m0 = new Matrix (2,3, [
-        [2, 1, -1],
-        [4, 3, 0]
-    ])
-    let m1 = new Matrix (3,2, [
-        [0, -1],
-        [2, 4],
-        [2, -3]
-    ])
-    let m2 = new Matrix (2,2, [
-        [1, -1],
-        [3, 0]
-    ])
-    // let arr = [4,5,6,7];
-    // console.log(arr);
-    console.table(m1.data);
-    console.table(Matrix.transpose(m1).data);
-    //m0.randomWeights();
-    // console.table(Matrix.dot(m0,m1).data);
+    nn = new NeuralNetwork(NUM_INPUTS , NUM_HIDDEN , NUM_OUTPUTS);
+    nn.feedForward([0,1])
 }
 
 
