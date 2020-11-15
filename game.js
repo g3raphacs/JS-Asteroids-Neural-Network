@@ -40,8 +40,8 @@ const SAVE_KEY_SCORE = "highscore"; // save key for local storage of highscore
 const AUTOMATION_ON = true;
 const SHOW_CENTER_DOT = false;
 const SHOW_BOUNDING = false;
-const SOUND_ON = false;
-const MUSIC_ON = false;
+const SOUND_ON = true;
+const MUSIC_ON = true;
 
 // neural network parameters
 const NUM_INPUTS = 4;
@@ -57,7 +57,7 @@ let canv = document.getElementById("gameCanvas");
 let context = canv.getContext("2d");
 
 // setup the game sound effects
-let fxLaser = new Sound("sounds/laser.m4a", 5, 0.1);
+let fxLaser = new Sound("sounds/laser.m4a", 5, 0.01);
 let fxExplode = new Sound("sounds/explode.m4a",1,0.3);
 let fxHit = new Sound("sounds/hit.m4a", 5, 0.3);
 let fxThrust = new Sound("sounds/thrust.m4a", 1, 0.3);
