@@ -28,17 +28,21 @@ const ROIDS_SIZE = 100 // starting size of asteroids in pixels
 const ROIDS_SPD = 50 // max starting speed of asteroids in px per seconds
 const ROIDS_VERT = 16 // avergage number of verticies in asteroids
 const ROIDS_JAG = 0.2 // jaggedness of asteroids ( 0= none , 1= lot)
+const ROIDS_PTS_LGE = 20
+const ROIDS_PTS_MED = 50
+const ROIDS_PTS_SML = 100
 const SHOW_CENTER_DOT = false;
 const SHOW_BOUNDING = false;
 const TEXT_FADE_TIME = 2.5; //Text fade time in seconds
 const TEXT_SIZE = 40; // text font size in pixels
 const GAME_LIVES = 3;
+const SAVE_KEY_SCORE = "highscore"; // save key for local storage of highscore
 
 let canv = document.getElementById("gameCanvas");
 let context = canv.getContext("2d");
 
 //setup th game parameters
-let level, lives, roids, ship, text, textAlpha;
+let level, lives, roids, ship, text, textAlpha, score, scoreHigh;
 newGame();
 
 
@@ -119,9 +123,19 @@ function destroyAsteroid(i){
     if(r == Math.ceil(ROIDS_SIZE / 2)){
         roids.push(newAsteroid(x,y,Math.ceil(ROIDS_SIZE / 4)))
         roids.push(newAsteroid(x,y,Math.ceil(ROIDS_SIZE / 4)))
+        score += ROIDS_PTS_LGE;
     }else if(r == Math.ceil(ROIDS_SIZE / 4)){
         roids.push(newAsteroid(x,y,Math.ceil(ROIDS_SIZE / 8)))
         roids.push(newAsteroid(x,y,Math.ceil(ROIDS_SIZE / 8)))
+        score += ROIDS_PTS_MED;
+    }else{
+        score += ROIDS_PTS_SML;
+    }
+
+    //check highscore
+    if(score > scoreHigh){
+        scoreHigh = score;
+        localStorage.setItem(SAVE_KEY_SCORE, scoreHigh);
     }
 
     // destroy the asteroid
@@ -157,7 +171,18 @@ function newAsteroid(x , y , r){
 function newGame(){
     level = 0;
     lives = GAME_LIVES;
+    score = 0;
     ship = newShip();
+
+    // get the highscore from local storage
+    let scoreString = localStorage.getItem(SAVE_KEY_SCORE);
+
+    if (scoreString == null){
+        scoreHigh = 0;
+    }else{
+        scoreHigh = parseInt(scoreString)
+    }
+
     newLevel();
 }
 
@@ -555,6 +580,19 @@ function update(){
         lifeColor = exploding && i == lives -1 ? "red" : "white";
         drawShip(SHIP_SIZE + i * SHIP_SIZE * 1.2 , SHIP_SIZE, 0.5*Math.PI, lifeColor);
     }
+
+    //draw the score
+    context.textAlign = "right";
+    context.textBaseline = "middle";
+    context.fillStyle = "white";
+    context.font = TEXT_SIZE + "px arial";
+    context.fillText(score, canv.width - SHIP_SIZE / 2 , SHIP_SIZE);
+    //draw the highscore
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillStyle = "white";
+    context.font = TEXT_SIZE * 0.4 + "px arial";
+    context.fillText("Highscore: "+scoreHigh, canv.width / 2 , SHIP_SIZE);
     
 
 
